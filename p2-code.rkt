@@ -17,40 +17,41 @@
 
 ; List-of-images -> Image
 ; overlays a group of images on top of each other
-; Base case: white 10*10 rectangle -> white 10*10 rectangle
+; red 2pxl star -> red 2pxl star
 (check-expect
- (overlay-all (cons (rectangle 10 10 "solid" "white") '()))
- (rectangle 10 10 "solid" "white"))
+ (overlay-all (cons (star 2 "solid" "red") '()))
+ (overlay (star 2 "solid" "red") (rectangle 10 10 "solid" "white")))
 ; red 2*2 rectangle, blue 5pxl circle, purple 8pxl star -> overlays rectangle, circle, and star on top of each other
 (check-expect
  (overlay-all (cons (rectangle 2 2 "solid" "red") (cons (circle 5 "solid" "blue") (cons (star 8 "solid" "purple") '()))))
-   (overlay (rectangle 2 2 "solid" "red") (circle 5 "solid" "blue") (star 8 "solid" "purple")))
+   (overlay (rectangle 2 2 "solid" "red") (circle 5 "solid" "blue") (star 8 "solid" "purple") (rectangle 10 10 "solid" "white")))
 ; blue 50pxl star, purple tpxl triangle, red 10pxl star -> overlays star, triangle, and star on top of each other
 (check-expect
  (overlay-all (cons (star 50 "solid" "blue") (cons (triangle 5 "solid" "purple") (cons (star 10 "outline" "red") '()))))
- (overlay (star 50 "solid" "blue") (triangle 5 "solid" "purple") (star 10 "outline" "red")))
+ (overlay (star 50 "solid" "blue") (triangle 5 "solid" "purple") (star 10 "outline" "red") (rectangle 10 10 "solid" "white")))
 (define (overlay-all List-of-images)
   (cond
-    [(equal? (length List-of-images) 1) (first List-of-images)]
-    [(equal? (length List-of-images) 2) (overlay (first List-of-images) (first (rest List-of-images)))]
+    [(empty? List-of-images) (rectangle 10 10 "solid" "white")]
     [else (overlay (first List-of-images) (overlay-all (rest List-of-images)))]))
     
 ; List-of-numbers -> Images
 ; creates side by side black bar graphs with varying heights given from a list of numbers
+; "14" -> black rectangle size 10*14
+(check-expect
+ (bar-graph (cons 14 '()))
+ (beside/align "bottom" (rectangle 10 14 "solid" "black") (rectangle 1 1 "solid" "white")))
 ; "20, 10, 30" -> black rectangle size 10*20 next to black rectangle size 10*10 next to black rectangle 10*30
 (check-expect
  (bar-graph (cons 20 (cons 10 (cons 30 '()))))
- (beside/align "middle" (rectangle 10 20 "solid" "black") (rectangle 10 10 "solid" "black") (rectangle 10 30 "solid" "black")))
-; Base case: "10" -> black rectangle size 10*10
+ (beside/align "bottom" (rectangle 10 20 "solid" "black") (rectangle 10 10 "solid" "black") (rectangle 10 30 "solid" "black") (rectangle 1 1 "solid" "white")))
+; "11.5", "22" -> black rectangle size 10*11 next to black rectangle size 10*22
 (check-expect
- (bar-graph (cons 10 '()))
- (rectangle 10 10 "solid" "black"))
+ (bar-graph (cons 11.5 (cons 22 '())))
+ (beside/align "bottom" (rectangle 10 11.5 "solid" "black") (rectangle 10 22 "solid" "black") (rectangle 1 1 "solid" "white")))
 (define (bar-graph List-of-numbers)
   (cond
-    [(equal? (length List-of-numbers) 1) (rectangle 10 (first List-of-numbers) "solid" "black")]
-    [(equal? (length List-of-numbers) 2) (beside/align "middle" (rectangle 10 (first List-of-numbers) "solid" "black") (rectangle 10 (first (rest List-of-numbers)) "solid" "black"))]
-    [else (beside/align "middle" (rectangle 10 (first List-of-numbers) "solid" "black") (bar-graph (rest List-of-numbers)))]))
-                                   
+    [(empty? List-of-numbers) (rectangle 1 1 "solid" "white")]
+    [else (beside/align "bottom" (rectangle 10 (first List-of-numbers) "solid" "black") (bar-graph (rest List-of-numbers)))]))
 
 ; Any List-of-any -> Boolean
 ; runs through a list of values
